@@ -3,9 +3,9 @@ import fs from "fs";
 import path from "path";
 import { pool } from "../config/db";
 
-const ADMIN_NAME = "Admin";
-const ADMIN_EMAIL = "admin@ngo.org";
-const ADMIN_PASSWORD = "Admin@123";
+const ADMIN_NAME = process.env.ADMIN_NAME || "Admin";
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@ngo.org";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "Admin@123";
 
 async function run() {
   const schema = fs.readFileSync(path.join(__dirname, "schema.sql"), "utf-8");
@@ -20,7 +20,7 @@ async function run() {
       "INSERT INTO users (name, email, password_hash, role) VALUES ($1, $2, $3, 'admin')",
       [ADMIN_NAME, ADMIN_EMAIL, passwordHash]
     );
-    console.log(`Seeded admin user: ${ADMIN_EMAIL} / ${ADMIN_PASSWORD}`);
+    console.log(`Seeded admin user: ${ADMIN_EMAIL}`);
   } else {
     console.log("Admin user already exists, skipping seed.");
   }
