@@ -1,11 +1,14 @@
 import { Router } from "express";
 import { pool } from "../config/db";
+import authRoutes from "./auth.routes";
 
 const router = Router();
 
 router.get("/health", (_req, res) => {
   res.json({ status: "ok" });
 });
+
+router.use("/auth", authRoutes);
 
 router.get("/db-check", async (_req, res) => {
   try {
