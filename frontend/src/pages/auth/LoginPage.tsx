@@ -38,17 +38,19 @@ export function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50 flex items-center justify-center px-4">
-      <div className="w-full max-w-sm bg-white border border-neutral-200 rounded-md p-8">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+      <div className="w-full max-w-sm bg-white border border-gray-200 rounded-lg p-8 shadow-sm">
         <div className="flex flex-col items-center mb-6">
-          <div className="w-12 h-12 rounded-full bg-neutral-200 mb-3" />
-          <h1 className="text-lg font-semibold text-neutral-900">NGO Donation Portal</h1>
-          <p className="text-sm text-neutral-500">Sign in to continue</p>
+          <div className="w-12 h-12 rounded-full bg-primary-light flex items-center justify-center mb-3">
+            <span className="text-primary font-bold">M</span>
+          </div>
+          <h1 className="text-lg font-bold text-gray-900">MICF Staff Login</h1>
+          <p className="text-sm text-gray-500">Sign in to continue</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-neutral-700 mb-1">
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
               Email
             </label>
             <input
@@ -56,12 +58,12 @@ export function LoginPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full border border-neutral-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-neutral-400"
+              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-neutral-700 mb-1">
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
               Password
             </label>
             <input
@@ -69,7 +71,7 @@ export function LoginPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full border border-neutral-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-neutral-400"
+              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
             />
           </div>
 
@@ -78,7 +80,7 @@ export function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-neutral-900 text-white text-sm font-medium py-2 rounded-md disabled:opacity-60"
+            className="w-full bg-primary hover:bg-primary-dark text-white text-sm font-semibold py-2.5 rounded-md disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
           >
             {loading ? "Logging in..." : "Login"}
           </button>

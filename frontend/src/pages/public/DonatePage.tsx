@@ -74,58 +74,58 @@ export function DonatePage() {
 
   if (processing) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-neutral-50">
-        <div className="bg-white border border-neutral-200 rounded-md p-8 text-center">
-          <p className="text-sm font-medium text-neutral-900">Processing Payment...</p>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="bg-white border border-gray-200 rounded-lg p-8 text-center shadow-sm">
+          <p className="text-sm font-medium text-gray-900">Processing Payment...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50 flex items-center justify-center px-4">
-      <div className="w-full max-w-sm bg-white border border-neutral-200 rounded-md p-8">
-        <h1 className="text-lg font-semibold text-neutral-900 mb-1">Donate</h1>
-        <p className="text-sm text-neutral-500 mb-6">{campaign?.title ?? "Loading campaign..."}</p>
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-10">
+      <div className="w-full max-w-sm bg-white border border-gray-200 rounded-lg p-8 shadow-sm">
+        <h1 className="text-lg font-bold text-gray-900 mb-1">Donate</h1>
+        <p className="text-sm text-gray-500 mb-6">{campaign?.title ?? "Loading campaign..."}</p>
 
         <form onSubmit={handleSubmit} noValidate className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-1">Name</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full border border-neutral-300 rounded-md px-3 py-2 text-sm"
+              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-1">Email</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full border border-neutral-300 rounded-md px-3 py-2 text-sm"
+              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-1">Phone</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
             <input
               type="text"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              className="w-full border border-neutral-300 rounded-md px-3 py-2 text-sm"
+              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-1">Amount</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Amount</label>
             <input
               type="number"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="w-full border border-neutral-300 rounded-md px-3 py-2 text-sm"
+              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
             />
           </div>
 
@@ -133,7 +133,7 @@ export function DonatePage() {
 
           <button
             type="submit"
-            className="w-full bg-neutral-900 text-white text-sm font-medium py-2 rounded-md"
+            className="w-full bg-primary hover:bg-primary-dark text-white text-sm font-semibold py-2.5 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
           >
             Donate
           </button>

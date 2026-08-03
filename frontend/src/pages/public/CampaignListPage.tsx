@@ -1,11 +1,16 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { AboutSection } from "../../components/public/AboutSection";
+import { ContactSection } from "../../components/public/ContactSection";
+import { FeaturedCampaignsSection } from "../../components/public/FeaturedCampaignsSection";
+import { Hero } from "../../components/public/Hero";
+import { HowItWorksSection } from "../../components/public/HowItWorksSection";
+import { PublicFooter } from "../../components/public/PublicFooter";
+import { PublicHeader } from "../../components/public/PublicHeader";
+import { StatsSection } from "../../components/public/StatsSection";
 import { fetchCampaigns } from "../../api/campaigns";
-import { useAuth } from "../../context/AuthContext";
 import { Campaign } from "../../types/campaign";
 
 export function CampaignListPage() {
-  const { token } = useAuth();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -18,50 +23,15 @@ export function CampaignListPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-neutral-50">
-      <div className="bg-white border-b border-neutral-200">
-        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-          <h1 className="font-semibold text-neutral-900">NGO Donation Portal</h1>
-          <Link
-            to={token ? "/dashboard" : "/login"}
-            className="text-sm font-medium text-neutral-600 hover:text-neutral-900"
-          >
-            Staff Login
-          </Link>
-        </div>
-      </div>
-
-      <div className="max-w-5xl mx-auto p-6">
-        <h2 className="text-lg font-semibold text-neutral-900 mb-4">Active Campaigns</h2>
-
-        {loading ? (
-          <p className="text-sm text-neutral-500">Loading...</p>
-        ) : error ? (
-          <p className="text-sm text-red-600">{error}</p>
-        ) : campaigns.length === 0 ? (
-          <p className="text-sm text-neutral-500">No active campaigns right now.</p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {campaigns.map((campaign) => (
-              <div key={campaign.id} className="bg-white border border-neutral-200 rounded-md p-4">
-                <h3 className="font-medium text-neutral-900">{campaign.title}</h3>
-                {campaign.description && (
-                  <p className="text-sm text-neutral-500 mt-1">{campaign.description}</p>
-                )}
-                <p className="text-sm text-neutral-700 mt-3">
-                  Raised {campaign.current_amount} of {campaign.target_amount}
-                </p>
-                <Link
-                  to={`/donate/${campaign.id}`}
-                  className="inline-block mt-3 text-sm font-medium bg-neutral-900 text-white rounded-md px-3 py-1.5"
-                >
-                  Donate
-                </Link>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+    <div className="min-h-screen bg-white">
+      <PublicHeader />
+      <Hero />
+      <StatsSection campaigns={campaigns} />
+      <AboutSection />
+      <HowItWorksSection />
+      <FeaturedCampaignsSection campaigns={campaigns} loading={loading} error={error} />
+      <ContactSection />
+      <PublicFooter />
     </div>
   );
 }
