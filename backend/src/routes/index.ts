@@ -2,6 +2,7 @@ import { Router } from "express";
 import { pool } from "../config/db";
 import authRoutes from "./auth.routes";
 import campaignRoutes from "./campaign.routes";
+import donationRoutes from "./donation.routes";
 
 const router = Router();
 
@@ -11,6 +12,7 @@ router.get("/health", (_req, res) => {
 
 router.use("/auth", authRoutes);
 router.use("/campaigns", campaignRoutes);
+router.use("/donations", donationRoutes);
 
 router.get("/db-check", async (_req, res) => {
   try {

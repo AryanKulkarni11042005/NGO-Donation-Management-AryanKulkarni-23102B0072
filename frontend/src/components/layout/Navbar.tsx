@@ -15,6 +15,9 @@ export function Navbar() {
           <Link to="/campaigns" className="text-sm text-neutral-600 hover:text-neutral-900">
             Campaigns
           </Link>
+          <Link to="/donations" className="text-sm text-neutral-600 hover:text-neutral-900">
+            Donations
+          </Link>
         </div>
         <div className="flex items-center gap-4">
           <span className="text-sm text-neutral-500">
