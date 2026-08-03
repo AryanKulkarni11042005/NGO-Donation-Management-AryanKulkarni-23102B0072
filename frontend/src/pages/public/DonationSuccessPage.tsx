@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { downloadCertificate } from "../../api/certificates";
 import { Donation } from "../../types/donation";
 
 interface LocationState {
@@ -10,7 +11,7 @@ interface LocationState {
 export function DonationSuccessPage() {
   const location = useLocation();
   const state = location.state as LocationState | undefined;
-  const [certificateMessage, setCertificateMessage] = useState("");
+  const [certificateError, setCertificateError] = useState("");
 
   if (!state?.donation) {
     return (
@@ -26,6 +27,21 @@ export function DonationSuccessPage() {
   }
 
   const { donation, campaignTitle } = state;
+
+  async function handleDownload() {
+    setCertificateError("");
+    try {
+      const blob = await downloadCertificate(donation.id);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `certificate-${donation.transaction_id}.pdf`;
+      link.click();
+      window.URL.revokeObjectURL(url);
+    } catch {
+      setCertificateError("Failed to download certificate.");
+    }
+  }
 
   return (
     <div className="min-h-screen bg-neutral-50 flex items-center justify-center px-4">
@@ -50,12 +66,12 @@ export function DonationSuccessPage() {
           </p>
         </div>
 
-        {certificateMessage && (
-          <p className="text-sm text-neutral-500 mt-4">{certificateMessage}</p>
+        {certificateError && (
+          <p className="text-sm text-red-600 mt-4">{certificateError}</p>
         )}
 
         <button
-          onClick={() => setCertificateMessage("Certificate Coming Soon")}
+          onClick={handleDownload}
           className="w-full mt-6 border border-neutral-300 text-sm font-medium py-2 rounded-md"
         >
           Download Certificate
