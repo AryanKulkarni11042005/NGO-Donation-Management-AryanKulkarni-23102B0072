@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { fetchCampaigns } from "../../api/campaigns";
 import { Campaign } from "../../types/campaign";
 
@@ -42,6 +43,12 @@ export function CampaignListPage() {
                 <p className="text-sm text-neutral-700 mt-3">
                   Raised {campaign.current_amount} of {campaign.target_amount}
                 </p>
+                <Link
+                  to={`/donate/${campaign.id}`}
+                  className="inline-block mt-3 text-sm font-medium bg-neutral-900 text-white rounded-md px-3 py-1.5"
+                >
+                  Donate
+                </Link>
               </div>
             ))}
           </div>
