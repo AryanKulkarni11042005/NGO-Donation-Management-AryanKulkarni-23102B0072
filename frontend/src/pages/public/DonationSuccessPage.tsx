@@ -17,8 +17,8 @@ export function DonationSuccessPage() {
     return (
       <div className="min-h-screen flex items-center justify-center px-4">
         <div className="text-center">
-          <p className="text-sm text-neutral-500">No donation to show.</p>
-          <Link to="/" className="text-sm font-medium text-neutral-900 underline mt-2 inline-block">
+          <p className="text-sm text-gray-500">No donation to show.</p>
+          <Link to="/" className="text-sm font-medium text-primary underline mt-2 inline-block">
             Back to campaigns
           </Link>
         </div>
@@ -44,25 +44,29 @@ export function DonationSuccessPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50 flex items-center justify-center px-4">
-      <div className="w-full max-w-sm bg-white border border-neutral-200 rounded-md p-8 text-center">
-        <h1 className="text-lg font-semibold text-neutral-900">Donation Successful</h1>
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-10">
+      <div className="w-full max-w-sm bg-white border border-gray-200 rounded-lg p-8 text-center shadow-sm">
+        <div className="w-12 h-12 rounded-full bg-primary-light flex items-center justify-center mx-auto">
+          <span className="text-primary text-2xl">✓</span>
+        </div>
+        <h1 className="text-lg font-bold text-gray-900 mt-4">Donation Successful</h1>
+        <p className="text-sm text-gray-500 mt-1">Thank you for your generosity.</p>
 
         <div className="text-left mt-6 space-y-2 text-sm">
           <p>
-            <span className="text-neutral-500">Donor:</span> {donation.donor_name}
+            <span className="text-gray-500">Donor:</span> {donation.donor_name}
           </p>
           <p>
-            <span className="text-neutral-500">Campaign:</span> {campaignTitle ?? donation.campaign_id}
+            <span className="text-gray-500">Campaign:</span> {campaignTitle ?? donation.campaign_id}
           </p>
           <p>
-            <span className="text-neutral-500">Amount:</span> {donation.amount}
+            <span className="text-gray-500">Amount:</span> {donation.amount}
           </p>
           <p>
-            <span className="text-neutral-500">Transaction ID:</span> {donation.transaction_id}
+            <span className="text-gray-500">Transaction ID:</span> {donation.transaction_id}
           </p>
           <p>
-            <span className="text-neutral-500">Date:</span> {new Date(donation.created_at).toLocaleString()}
+            <span className="text-gray-500">Date:</span> {new Date(donation.created_at).toLocaleString()}
           </p>
         </div>
 
@@ -72,12 +76,12 @@ export function DonationSuccessPage() {
 
         <button
           onClick={handleDownload}
-          className="w-full mt-6 border border-neutral-300 text-sm font-medium py-2 rounded-md"
+          className="w-full mt-6 bg-primary hover:bg-primary-dark text-white text-sm font-semibold py-2.5 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
         >
           Download Certificate
         </button>
 
-        <Link to="/" className="block mt-4 text-sm font-medium text-neutral-900 underline">
+        <Link to="/" className="block mt-4 text-sm font-medium text-primary underline">
           Back to campaigns
         </Link>
       </div>

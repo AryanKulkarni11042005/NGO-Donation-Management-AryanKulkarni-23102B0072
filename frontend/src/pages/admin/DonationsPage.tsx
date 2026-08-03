@@ -53,10 +53,10 @@ export function DonationsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
       <div className="max-w-5xl mx-auto p-6">
-        <h1 className="text-lg font-semibold text-neutral-900 mb-4">Donations</h1>
+        <h1 className="text-xl font-bold text-gray-900 mb-6">Donations</h1>
 
         <form onSubmit={handleFilterSubmit} className="mb-4 flex gap-2">
           <input
@@ -64,12 +64,12 @@ export function DonationsPage() {
             placeholder="Search by name, email, or transaction ID..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="border border-neutral-300 rounded-md px-3 py-1.5 text-sm flex-1 max-w-xs"
+            className="border border-gray-300 rounded-md px-3 py-1.5 text-sm flex-1 max-w-xs focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
           />
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as DonationStatus | "")}
-            className="border border-neutral-300 rounded-md px-3 py-1.5 text-sm"
+            className="border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
           >
             <option value="">All statuses</option>
             {STATUSES.map((status) => (
@@ -80,43 +80,43 @@ export function DonationsPage() {
           </select>
           <button
             type="submit"
-            className="text-sm font-medium border border-neutral-300 rounded-md px-3 py-1.5"
+            className="text-sm font-medium border border-gray-300 rounded-md px-3 py-1.5 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
           >
             Filter
           </button>
         </form>
 
-        <div className="bg-white border border-neutral-200 rounded-md overflow-hidden">
+        <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
           {loading ? (
-            <p className="p-4 text-sm text-neutral-500">Loading...</p>
+            <p className="p-4 text-sm text-gray-500">Loading...</p>
           ) : error ? (
             <p className="p-4 text-sm text-red-600">{error}</p>
           ) : donations.length === 0 ? (
-            <p className="p-4 text-sm text-neutral-500">No donations found.</p>
+            <p className="p-4 text-sm text-gray-500">No donations found.</p>
           ) : (
             <table className="w-full text-sm">
-              <thead className="bg-neutral-50 border-b border-neutral-200">
+              <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th className="text-left px-4 py-2 font-medium text-neutral-600">Donor</th>
-                  <th className="text-left px-4 py-2 font-medium text-neutral-600">Email</th>
-                  <th className="text-left px-4 py-2 font-medium text-neutral-600">Amount</th>
-                  <th className="text-left px-4 py-2 font-medium text-neutral-600">Transaction ID</th>
-                  <th className="text-left px-4 py-2 font-medium text-neutral-600">Status</th>
-                  <th className="text-left px-4 py-2 font-medium text-neutral-600">Date</th>
-                  {isAdmin && <th className="text-left px-4 py-2 font-medium text-neutral-600"></th>}
+                  <th className="text-left px-4 py-2 font-medium text-gray-600">Donor</th>
+                  <th className="text-left px-4 py-2 font-medium text-gray-600">Email</th>
+                  <th className="text-left px-4 py-2 font-medium text-gray-600">Amount</th>
+                  <th className="text-left px-4 py-2 font-medium text-gray-600">Transaction ID</th>
+                  <th className="text-left px-4 py-2 font-medium text-gray-600">Status</th>
+                  <th className="text-left px-4 py-2 font-medium text-gray-600">Date</th>
+                  {isAdmin && <th className="text-left px-4 py-2 font-medium text-gray-600"></th>}
                 </tr>
               </thead>
               <tbody>
                 {donations.map((donation) => (
-                  <tr key={donation.id} className="border-b border-neutral-100 last:border-0">
-                    <td className="px-4 py-2 text-neutral-900">{donation.donor_name}</td>
-                    <td className="px-4 py-2 text-neutral-700">{donation.donor_email}</td>
-                    <td className="px-4 py-2 text-neutral-700">{donation.amount}</td>
-                    <td className="px-4 py-2 text-neutral-700">{donation.transaction_id}</td>
+                  <tr key={donation.id} className="border-b border-gray-100 last:border-0">
+                    <td className="px-4 py-2 text-gray-900">{donation.donor_name}</td>
+                    <td className="px-4 py-2 text-gray-700">{donation.donor_email}</td>
+                    <td className="px-4 py-2 text-gray-700">{donation.amount}</td>
+                    <td className="px-4 py-2 text-gray-700">{donation.transaction_id}</td>
                     <td className="px-4 py-2">
                       <StatusBadge status={donation.status} />
                     </td>
-                    <td className="px-4 py-2 text-neutral-700">
+                    <td className="px-4 py-2 text-gray-700">
                       {new Date(donation.created_at).toLocaleDateString()}
                     </td>
                     {isAdmin && (
@@ -124,7 +124,7 @@ export function DonationsPage() {
                         <select
                           value={donation.status}
                           onChange={(e) => handleStatusChange(donation.id, e.target.value as DonationStatus)}
-                          className="border border-neutral-300 rounded-md px-2 py-1 text-sm capitalize"
+                          className="border border-gray-300 rounded-md px-2 py-1 text-sm capitalize focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                         >
                           {STATUSES.map((status) => (
                             <option key={status} value={status} className="capitalize">

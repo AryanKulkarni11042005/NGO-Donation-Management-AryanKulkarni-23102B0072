@@ -93,14 +93,14 @@ export function CampaignsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
       <div className="max-w-5xl mx-auto p-6">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-lg font-semibold text-neutral-900">Campaigns</h1>
+          <h1 className="text-xl font-bold text-gray-900">Campaigns</h1>
           <button
             onClick={openCreateForm}
-            className="text-sm font-medium bg-neutral-900 text-white rounded-md px-3 py-1.5"
+            className="text-sm font-medium bg-primary hover:bg-primary-dark text-white rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
           >
             New Campaign
           </button>
@@ -112,58 +112,58 @@ export function CampaignsPage() {
             placeholder="Search campaigns..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="border border-neutral-300 rounded-md px-3 py-1.5 text-sm flex-1 max-w-xs"
+            className="border border-gray-300 rounded-md px-3 py-1.5 text-sm flex-1 max-w-xs focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
           />
           <button
             type="submit"
-            className="text-sm font-medium border border-neutral-300 rounded-md px-3 py-1.5"
+            className="text-sm font-medium border border-gray-300 rounded-md px-3 py-1.5"
           >
             Search
           </button>
         </form>
 
         {showForm && (
-          <div className="bg-white border border-neutral-200 rounded-md p-5 mb-6">
-            <h2 className="text-sm font-semibold text-neutral-900 mb-3">
+          <div className="bg-white border border-gray-200 rounded-lg p-5 mb-6 shadow-sm">
+            <h2 className="text-sm font-semibold text-gray-900 mb-3">
               {editingId ? "Edit Campaign" : "New Campaign"}
             </h2>
             <form onSubmit={handleFormSubmit} className="grid grid-cols-2 gap-4">
               <div className="col-span-2">
-                <label className="block text-sm font-medium text-neutral-700 mb-1">Title</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
                 <input
                   type="text"
                   value={form.title}
                   onChange={(e) => setForm({ ...form, title: e.target.value })}
-                  className="w-full border border-neutral-300 rounded-md px-3 py-2 text-sm"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                 />
               </div>
 
               <div className="col-span-2">
-                <label className="block text-sm font-medium text-neutral-700 mb-1">Description</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                 <textarea
                   value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  className="w-full border border-neutral-300 rounded-md px-3 py-2 text-sm"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                   rows={3}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-1">Target Amount</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Target Amount</label>
                 <input
                   type="number"
                   value={form.target_amount}
                   onChange={(e) => setForm({ ...form, target_amount: Number(e.target.value) })}
-                  className="w-full border border-neutral-300 rounded-md px-3 py-2 text-sm"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-1">Status</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
                 <select
                   value={form.status}
                   onChange={(e) => setForm({ ...form, status: e.target.value as CampaignStatus })}
-                  className="w-full border border-neutral-300 rounded-md px-3 py-2 text-sm"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                 >
                   <option value="active">Active</option>
                   <option value="closed">Closed</option>
@@ -172,22 +172,22 @@ export function CampaignsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-1">Start Date</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
                 <input
                   type="date"
                   value={form.start_date}
                   onChange={(e) => setForm({ ...form, start_date: e.target.value })}
-                  className="w-full border border-neutral-300 rounded-md px-3 py-2 text-sm"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-1">End Date</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
                 <input
                   type="date"
                   value={form.end_date}
                   onChange={(e) => setForm({ ...form, end_date: e.target.value })}
-                  className="w-full border border-neutral-300 rounded-md px-3 py-2 text-sm"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                 />
               </div>
 
@@ -197,14 +197,14 @@ export function CampaignsPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="text-sm font-medium bg-neutral-900 text-white rounded-md px-4 py-2 disabled:opacity-60"
+                  className="text-sm font-medium bg-primary hover:bg-primary-dark text-white rounded-md px-4 py-2 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
                 >
                   {saving ? "Saving..." : "Save"}
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowForm(false)}
-                  className="text-sm font-medium border border-neutral-300 rounded-md px-4 py-2"
+                  className="text-sm font-medium border border-gray-300 rounded-md px-4 py-2"
                 >
                   Cancel
                 </button>
@@ -213,39 +213,39 @@ export function CampaignsPage() {
           </div>
         )}
 
-        <div className="bg-white border border-neutral-200 rounded-md overflow-hidden">
+        <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
           {loading ? (
-            <p className="p-4 text-sm text-neutral-500">Loading...</p>
+            <p className="p-4 text-sm text-gray-500">Loading...</p>
           ) : error ? (
             <p className="p-4 text-sm text-red-600">{error}</p>
           ) : campaigns.length === 0 ? (
-            <p className="p-4 text-sm text-neutral-500">No campaigns found.</p>
+            <p className="p-4 text-sm text-gray-500">No campaigns found.</p>
           ) : (
             <table className="w-full text-sm">
-              <thead className="bg-neutral-50 border-b border-neutral-200">
+              <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th className="text-left px-4 py-2 font-medium text-neutral-600">Title</th>
-                  <th className="text-left px-4 py-2 font-medium text-neutral-600">Target</th>
-                  <th className="text-left px-4 py-2 font-medium text-neutral-600">Raised</th>
-                  <th className="text-left px-4 py-2 font-medium text-neutral-600">Status</th>
-                  <th className="text-left px-4 py-2 font-medium text-neutral-600">Dates</th>
-                  <th className="text-left px-4 py-2 font-medium text-neutral-600"></th>
+                  <th className="text-left px-4 py-2 font-medium text-gray-600">Title</th>
+                  <th className="text-left px-4 py-2 font-medium text-gray-600">Target</th>
+                  <th className="text-left px-4 py-2 font-medium text-gray-600">Raised</th>
+                  <th className="text-left px-4 py-2 font-medium text-gray-600">Status</th>
+                  <th className="text-left px-4 py-2 font-medium text-gray-600">Dates</th>
+                  <th className="text-left px-4 py-2 font-medium text-gray-600"></th>
                 </tr>
               </thead>
               <tbody>
                 {campaigns.map((campaign) => (
-                  <tr key={campaign.id} className="border-b border-neutral-100 last:border-0">
-                    <td className="px-4 py-2 text-neutral-900">{campaign.title}</td>
-                    <td className="px-4 py-2 text-neutral-700">{campaign.target_amount}</td>
-                    <td className="px-4 py-2 text-neutral-700">{campaign.current_amount}</td>
-                    <td className="px-4 py-2 text-neutral-700 capitalize">{campaign.status}</td>
-                    <td className="px-4 py-2 text-neutral-700">
+                  <tr key={campaign.id} className="border-b border-gray-100 last:border-0">
+                    <td className="px-4 py-2 text-gray-900">{campaign.title}</td>
+                    <td className="px-4 py-2 text-gray-700">{campaign.target_amount}</td>
+                    <td className="px-4 py-2 text-gray-700">{campaign.current_amount}</td>
+                    <td className="px-4 py-2 text-gray-700 capitalize">{campaign.status}</td>
+                    <td className="px-4 py-2 text-gray-700">
                       {campaign.start_date.slice(0, 10)} to {campaign.end_date.slice(0, 10)}
                     </td>
                     <td className="px-4 py-2">
                       <button
                         onClick={() => openEditForm(campaign)}
-                        className="text-sm font-medium text-neutral-700 border border-neutral-300 rounded-md px-3 py-1"
+                        className="text-sm font-medium text-gray-700 border border-gray-300 rounded-md px-3 py-1"
                       >
                         Edit
                       </button>
