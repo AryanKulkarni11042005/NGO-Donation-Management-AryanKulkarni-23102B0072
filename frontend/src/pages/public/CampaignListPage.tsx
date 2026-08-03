@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { fetchCampaigns } from "../../api/campaigns";
+import { useAuth } from "../../context/AuthContext";
 import { Campaign } from "../../types/campaign";
 
 export function CampaignListPage() {
+  const { token } = useAuth();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -18,8 +20,14 @@ export function CampaignListPage() {
   return (
     <div className="min-h-screen bg-neutral-50">
       <div className="bg-white border-b border-neutral-200">
-        <div className="max-w-5xl mx-auto px-6 py-4">
+        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <h1 className="font-semibold text-neutral-900">NGO Donation Portal</h1>
+          <Link
+            to={token ? "/dashboard" : "/login"}
+            className="text-sm font-medium text-neutral-600 hover:text-neutral-900"
+          >
+            Staff Login
+          </Link>
         </div>
       </div>
 
