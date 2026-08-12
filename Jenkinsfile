@@ -44,9 +44,9 @@ pipeline {
                 sh 'mkdir -p /opt/homebrew/var/www/ngo-frontend'
                 sh 'cp -r frontend/dist/* /opt/homebrew/var/www/ngo-frontend'
                 sh 'cp nginx/nginx.conf /opt/homebrew/etc/nginx/nginx.conf'
-                sh 'brew services restart nginx'
+                sh '/opt/homebrew/bin/brew services restart nginx'
                 sh 'cp backend-springboot/target/*.war /opt/homebrew/opt/tomcat/libexec/webapps/'
-                sh 'brew services restart tomcat'
+                sh '/opt/homebrew/bin/brew services restart tomcat'
             }
         }
         stage('Verify') {
