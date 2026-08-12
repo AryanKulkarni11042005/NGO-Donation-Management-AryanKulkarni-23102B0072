@@ -27,7 +27,9 @@ pipeline {
         }
         stage('Test'){
             steps{
-                sh 'cd backend-springboot && mvn -B test'
+                withCredentials([string(credentialsId: 'db-password', variable: 'DB_PASSWORD')]) {
+                    sh 'cd backend-springboot && mvn -B test'
+                }
             }
         }
         stage('Package WAR'){
