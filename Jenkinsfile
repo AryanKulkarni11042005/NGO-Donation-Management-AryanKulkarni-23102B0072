@@ -52,7 +52,7 @@ pipeline {
         stage('Verify') {
             steps {
                 sh 'sleep 10'
-                sh 'curl -f http://localhost:8082/store/ || exit 1'
+                sh 'curl -f http://localhost:8082/store/campaigns || exit 1'
             }
         }
     }
