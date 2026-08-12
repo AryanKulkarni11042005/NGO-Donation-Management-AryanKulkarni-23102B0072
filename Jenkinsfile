@@ -3,7 +3,7 @@ pipeline {
     agent any
     tools {
         nodejs 'node-lts'
-        maven 'maven-3.9'
+        maven 'maven'
     }
     parameters {
         choice(name: 'ENVIRONMENT',
