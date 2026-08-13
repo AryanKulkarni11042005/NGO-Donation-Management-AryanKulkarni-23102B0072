@@ -44,15 +44,33 @@ pipeline {
                 sh 'mkdir -p /opt/homebrew/var/www/ngo-frontend'
                 sh 'cp -r frontend/dist/* /opt/homebrew/var/www/ngo-frontend'
                 sh 'cp nginx/nginx.conf /opt/homebrew/etc/nginx/nginx.conf'
+                // Fail the build on a bad config rather than taking the site down.
+                sh '/opt/homebrew/bin/nginx -t'
                 sh '/opt/homebrew/bin/brew services restart nginx'
-                sh 'cp backend-springboot/target/*.war /opt/homebrew/opt/tomcat/libexec/webapps/'
+                // Remove the exploded directory too, otherwise Tomcat can keep
+                // serving classes from the previous deployment.
+                sh 'rm -rf /opt/homebrew/opt/tomcat/libexec/webapps/store /opt/homebrew/opt/tomcat/libexec/webapps/store.war'
+                sh 'cp backend-springboot/target/store.war /opt/homebrew/opt/tomcat/libexec/webapps/'
                 sh '/opt/homebrew/bin/brew services restart tomcat'
             }
         }
         stage('Verify') {
             steps {
-                sh 'sleep 10'
-                sh 'curl -f http://localhost:8082/store/campaigns || exit 1'
+                // Tomcat needs time to expand the WAR and boot Spring, so poll
+                // instead of sleeping for a fixed guess.
+                sh '''
+                    for i in $(seq 1 12); do
+                        if curl -fs http://localhost:8082/store/health > /dev/null; then
+                            echo "Backend is up (attempt $i)"
+                            curl -s http://localhost:8082/store/health
+                            exit 0
+                        fi
+                        echo "Waiting for backend... ($i/12)"
+                        sleep 5
+                    done
+                    echo "Backend did not come up in time"
+                    exit 1
+                '''
             }
         }
     }
