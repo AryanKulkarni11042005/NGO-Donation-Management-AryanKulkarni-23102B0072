@@ -51,6 +51,22 @@ pipeline {
                 // serving classes from the previous deployment.
                 sh 'rm -rf /opt/homebrew/opt/tomcat/libexec/webapps/store /opt/homebrew/opt/tomcat/libexec/webapps/store.war'
                 sh 'cp backend-springboot/target/store.war /opt/homebrew/opt/tomcat/libexec/webapps/'
+                // Tomcat reads its environment once at startup, so the secrets have to
+                // land in setenv.sh before the restart rather than in this shell.
+                withCredentials([
+                    string(credentialsId: 'db-password', variable: 'DB_PASSWORD'),
+                    string(credentialsId: 'jwt-secret', variable: 'JWT_SECRET')
+                ]) {
+                    sh '''
+                        SETENV=/opt/homebrew/opt/tomcat/libexec/bin/setenv.sh
+                        umask 077
+                        cat > "$SETENV" <<EOF
+export DB_PASSWORD='$DB_PASSWORD'
+export JWT_SECRET='$JWT_SECRET'
+EOF
+                        chmod 700 "$SETENV"
+                    '''
+                }
                 sh '/opt/homebrew/bin/brew services restart tomcat'
             }
         }
