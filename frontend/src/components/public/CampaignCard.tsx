@@ -4,7 +4,10 @@ import { Campaign } from "../../types/campaign";
 export function CampaignCard({ campaign }: { campaign: Campaign }) {
   const target = Number(campaign.target_amount);
   const raised = Number(campaign.current_amount);
-  const progress = target > 0 ? Math.min(100, Math.round((raised / target) * 100)) : 0;
+  const percent = target > 0 ? Math.min(100, (raised / target) * 100) : 0;
+  // Rounding to an integer hid small-but-real progress (1,300 of 3,00,000 rounds
+  // to 0%), so keep the fraction and floor any non-zero value at a visible sliver.
+  const progress = percent > 0 ? Math.max(percent, 1.5) : 0;
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-5 flex flex-col">
