@@ -55,5 +55,29 @@ pipeline {
                 sh 'curl -f http://localhost:8082/store/campaigns || exit 1'
             }
         }
+        stage('Selenium E2E') {
+            steps {
+                // Drives the site nginx is serving, so this exercises the frontend,
+                // the proxy and the backend together rather than any one of them.
+                sh 'cd selenium-tests && mvn -B test -Dbase.url=http://localhost:8081'
+            }
+        }
+    }
+    post {
+        always {
+            // Publishes the Maven unit tests and the Selenium results together --
+            // the pipeline equivalent of the "Publish JUnit test result report"
+            // post-build action on a freestyle job.
+            junit testResults: '**/target/surefire-reports/*.xml', allowEmptyResults: true
+            archiveArtifacts artifacts: 'backend-springboot/target/store.war',
+                             allowEmptyArchive: true,
+                             fingerprint: true
+        }
+        success {
+            echo "Deployed to ${params.ENVIRONMENT} and all tests passed."
+        }
+        failure {
+            echo "Build failed - check the test report for the failing stage."
+        }
     }
 }
