@@ -100,32 +100,41 @@ EOF
             steps {
                 // Only reached once Test and Selenium E2E have both passed --
                 // that's what makes this "deploy after successful tests".
-                sh "cd backend-springboot && /usr/local/bin/docker build -t localhost:5050/ngo-backend:${env.BUILD_NUMBER} -t localhost:5050/ngo-backend:latest ."
+                // Docker (and its credential helper, docker-credential-desktop)
+                // live in /usr/local/bin, which isn't on the launchd/brew-services
+                // PATH Jenkins runs with.
+                withEnv(['PATH+DOCKER=/usr/local/bin']) {
+                    sh "cd backend-springboot && docker build -t localhost:5050/ngo-backend:${env.BUILD_NUMBER} -t localhost:5050/ngo-backend:latest ."
+                }
             }
         }
         stage('Push to Registry') {
             steps {
-                sh "/usr/local/bin/docker push localhost:5050/ngo-backend:${env.BUILD_NUMBER}"
-                sh '/usr/local/bin/docker push localhost:5050/ngo-backend:latest'
+                withEnv(['PATH+DOCKER=/usr/local/bin']) {
+                    sh "docker push localhost:5050/ngo-backend:${env.BUILD_NUMBER}"
+                    sh 'docker push localhost:5050/ngo-backend:latest'
+                }
             }
         }
         stage('Deploy Container') {
             steps {
-                // Always run from the freshly pushed image rather than whatever
-                // Docker already has cached locally.
-                sh "/usr/local/bin/docker pull localhost:5050/ngo-backend:${env.BUILD_NUMBER}"
-                sh '/usr/local/bin/docker rm -f ngo-backend-cd || true'
-                withCredentials([
-                    string(credentialsId: 'db-password', variable: 'DB_PASSWORD'),
-                    string(credentialsId: 'jwt-secret', variable: 'JWT_SECRET')
-                ]) {
-                    sh """
-                        /usr/local/bin/docker run -d --name ngo-backend-cd -p 8093:8080 \
-                            -e DB_URL='jdbc:postgresql://host.docker.internal:5433/ngo-donation-portal' \
-                            -e DB_PASSWORD=\$DB_PASSWORD \
-                            -e JWT_SECRET=\$JWT_SECRET \
-                            localhost:5050/ngo-backend:${env.BUILD_NUMBER}
-                    """
+                withEnv(['PATH+DOCKER=/usr/local/bin']) {
+                    // Always run from the freshly pushed image rather than whatever
+                    // Docker already has cached locally.
+                    sh "docker pull localhost:5050/ngo-backend:${env.BUILD_NUMBER}"
+                    sh 'docker rm -f ngo-backend-cd || true'
+                    withCredentials([
+                        string(credentialsId: 'db-password', variable: 'DB_PASSWORD'),
+                        string(credentialsId: 'jwt-secret', variable: 'JWT_SECRET')
+                    ]) {
+                        sh """
+                            docker run -d --name ngo-backend-cd -p 8093:8080 \
+                                -e DB_URL='jdbc:postgresql://host.docker.internal:5433/ngo-donation-portal' \
+                                -e DB_PASSWORD=\$DB_PASSWORD \
+                                -e JWT_SECRET=\$JWT_SECRET \
+                                localhost:5050/ngo-backend:${env.BUILD_NUMBER}
+                        """
+                    }
                 }
             }
         }
