@@ -3,13 +3,21 @@ import fs from "fs";
 import path from "path";
 import { pool } from "../config/db";
 
+function requireEnv(name: string): string {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`Missing required environment variable: ${name}`);
+  }
+  return value;
+}
+
 const ADMIN_NAME = process.env.ADMIN_NAME || "Admin";
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@ngo.org";
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "Admin@123";
+const ADMIN_PASSWORD = requireEnv("ADMIN_PASSWORD");
 
 const VOLUNTEER_NAME = process.env.VOLUNTEER_NAME || "Volunteer";
 const VOLUNTEER_EMAIL = process.env.VOLUNTEER_EMAIL || "volunteer@ngo.org";
-const VOLUNTEER_PASSWORD = process.env.VOLUNTEER_PASSWORD || "Volunteer@123";
+const VOLUNTEER_PASSWORD = requireEnv("VOLUNTEER_PASSWORD");
 
 async function seedUser(name: string, email: string, password: string, role: "admin" | "volunteer") {
   const existing = await pool.query("SELECT id FROM users WHERE email = $1", [email]);
