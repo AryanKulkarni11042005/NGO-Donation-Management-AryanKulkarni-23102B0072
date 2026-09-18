@@ -24,7 +24,7 @@ services:
       context: .
       dockerfile: frontend/Dockerfile
     ports:
-      - "8081:80"
+      - "8091:80"
     depends_on:
       - backend-springboot
 
