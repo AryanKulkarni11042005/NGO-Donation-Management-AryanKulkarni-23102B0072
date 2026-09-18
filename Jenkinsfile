@@ -96,6 +96,56 @@ EOF
                 sh 'cd selenium-tests && mvn -B test -Dbase.url=http://localhost:8081'
             }
         }
+        stage('Build Docker Image') {
+            steps {
+                // Only reached once Test and Selenium E2E have both passed --
+                // that's what makes this "deploy after successful tests".
+                sh "cd backend-springboot && /usr/local/bin/docker build -t localhost:5050/ngo-backend:${env.BUILD_NUMBER} -t localhost:5050/ngo-backend:latest ."
+            }
+        }
+        stage('Push to Registry') {
+            steps {
+                sh "/usr/local/bin/docker push localhost:5050/ngo-backend:${env.BUILD_NUMBER}"
+                sh '/usr/local/bin/docker push localhost:5050/ngo-backend:latest'
+            }
+        }
+        stage('Deploy Container') {
+            steps {
+                // Always run from the freshly pushed image rather than whatever
+                // Docker already has cached locally.
+                sh "/usr/local/bin/docker pull localhost:5050/ngo-backend:${env.BUILD_NUMBER}"
+                sh '/usr/local/bin/docker rm -f ngo-backend-cd || true'
+                withCredentials([
+                    string(credentialsId: 'db-password', variable: 'DB_PASSWORD'),
+                    string(credentialsId: 'jwt-secret', variable: 'JWT_SECRET')
+                ]) {
+                    sh """
+                        /usr/local/bin/docker run -d --name ngo-backend-cd -p 8093:8080 \
+                            -e DB_URL='jdbc:postgresql://host.docker.internal:5433/ngo-donation-portal' \
+                            -e DB_PASSWORD=\$DB_PASSWORD \
+                            -e JWT_SECRET=\$JWT_SECRET \
+                            localhost:5050/ngo-backend:${env.BUILD_NUMBER}
+                    """
+                }
+            }
+        }
+        stage('Verify Container') {
+            steps {
+                sh '''
+                    for i in $(seq 1 12); do
+                        if curl -fs http://localhost:8093/store/health > /dev/null; then
+                            echo "Containerized backend is up (attempt $i)"
+                            curl -s http://localhost:8093/store/health
+                            exit 0
+                        fi
+                        echo "Waiting for containerized backend... ($i/12)"
+                        sleep 5
+                    done
+                    echo "Containerized backend did not come up in time"
+                    exit 1
+                '''
+            }
+        }
     }
     post {
         always {
@@ -108,7 +158,7 @@ EOF
                              fingerprint: true
         }
         success {
-            echo "Deployed to ${params.ENVIRONMENT} and all tests passed."
+            echo "Deployed to ${params.ENVIRONMENT} (Tomcat + Docker build ${env.BUILD_NUMBER}) and all tests passed."
         }
         failure {
             echo "Build failed - check the test report for the failing stage."
