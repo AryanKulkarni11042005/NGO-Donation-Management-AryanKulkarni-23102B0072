@@ -5,10 +5,10 @@ A small, monolithic donation management portal built to demonstrate a complete D
 ## Tech Stack
 
 - **Frontend**: React, TypeScript, Vite, Tailwind CSS
-- **Backend**: Express.js, TypeScript
+- **Backend**: Spring Boot (Java 17), packaged as a WAR and deployed to Tomcat — see the [ngo-donation-portal-springboot](https://github.com/AryanKulkarni11042005/ngo-donation-portal-springboot) repo
 - **Database**: PostgreSQL
 - **Auth**: JWT
-- **PDF**: PDFKit
+- **E2E Testing**: Selenium (Java/Maven), run from `selenium-tests/`
 - **Deployment**: Docker, Docker Compose, Nginx, Ansible
 
 ## Roles
@@ -20,21 +20,18 @@ A small, monolithic donation management portal built to demonstrate a complete D
 ## Project Structure
 
 ```
-backend/    Express + TypeScript API
-frontend/   React + TypeScript + Vite UI
-nginx/      Reverse proxy config
-ansible/    Provisioning playbook (Oracle Cloud VM)
+frontend/         React + TypeScript + Vite UI
+selenium-tests/   Selenium E2E suite (Java/Maven)
+nginx/            Reverse proxy config
+ansible/          Provisioning playbook (Oracle Cloud VM)
 ```
+
+The Spring Boot backend lives in a separate repo: [ngo-donation-portal-springboot](https://github.com/AryanKulkarni11042005/ngo-donation-portal-springboot).
 
 ## Local Development
 
 ### Backend
-```
-cd backend
-cp .env.example .env
-npm install
-npm run dev
-```
+See the [ngo-donation-portal-springboot](https://github.com/AryanKulkarni11042005/ngo-donation-portal-springboot) repo.
 
 ### Frontend
 ```
@@ -45,7 +42,7 @@ npm run dev
 
 ## Database
 
-PostgreSQL database `ngo-donation-portal` on port `5433`. Schema in `backend/src/db/schema.sql`.
+PostgreSQL database `ngo-donation-portal` on port `5433`.
 
 ## Roadmap
 
