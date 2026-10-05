@@ -1,0 +1,55 @@
+# Restore the previous stable release (or a named one) without redeploying.
+#   ansible-playbook rollback.yml                          # the release before the live one
+#   ansible-playbook rollback.yml -e ngo_rollback_to=build-21
+- name: Roll the NGO Donation Portal back to a previous release
+  hosts: ngo_nodes
+  become: true
+
+  tasks:
+    - name: Find the live release
+      ansible.builtin.stat:
+        path: "{{ ngo_current_link }}"
+      register: current_link
+
+    - name: Find the releases kept on the node
+      ansible.builtin.find:
+        paths: "{{ ngo_releases_dir }}"
+        file_type: directory
+      register: kept
+
+    - name: Work out the rollback target
+      ansible.builtin.set_fact:
+        live_release: "{{ current_link.stat.lnk_target | basename }}"
+        releases_oldest_first: "{{ kept.files | sort(attribute='mtime') | map(attribute='path') | map('basename') | list }}"
+
+    - name: Pick the release deployed before the live one
+      ansible.builtin.set_fact:
+        rollback_target: >-
+          {{ ngo_rollback_to | default(
+               releases_oldest_first[releases_oldest_first.index(live_release) - 1]
+               if releases_oldest_first.index(live_release) > 0 else '') }}
+
+    - name: Refuse to roll back to nothing or to the live release
+      ansible.builtin.assert:
+        that:
+          - rollback_target | length > 0
+          - rollback_target != live_release
+          - rollback_target in releases_oldest_first
+        fail_msg: "No usable rollback target (live: {{ live_release }}, kept: {{ releases_oldest_first }})"
+        quiet: true
+
+    - name: Switch {{ live_release }} -> {{ rollback_target }}
+      ansible.builtin.include_role:
+        name: app
+        tasks_from: switch.yml
+      vars:
+        target_release: "{{ rollback_target }}"
+
+    - name: Health-check {{ rollback_target }}
+      ansible.builtin.include_role:
+        name: app
+        tasks_from: healthcheck.yml
+
+    - name: Report
+      ansible.builtin.debug:
+        msg: "Rolled back from {{ live_release }} to {{ rollback_target }}; health check passed."

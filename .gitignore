@@ -10,3 +10,4 @@ coverage/
 *.tsbuildinfo
 backend/
 target/
+ansible/.secrets.env

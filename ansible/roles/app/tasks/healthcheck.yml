@@ -1,0 +1,30 @@
+# All checks go through nginx, so they cover the proxy, Tomcat and the DB.
+- name: Wait for the backend health endpoint
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ ngo_http_port }}{{ ngo_context_path }}/health"
+    return_content: true
+  register: health
+  until: health.status == 200 and (health.json.status | default('')) == 'ok'
+  retries: 24
+  delay: 5
+
+- name: Check a database-backed endpoint
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ ngo_http_port }}{{ ngo_context_path }}/campaigns"
+    return_content: true
+  register: campaigns
+  failed_when: campaigns.status != 200 or campaigns.json.campaigns is not defined
+
+- name: Check the frontend is served
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ ngo_http_port }}/"
+    return_content: true
+  register: frontend
+  failed_when: frontend.status != 200 or '<div id="root">' not in frontend.content
+
+- name: Health summary
+  ansible.builtin.debug:
+    msg:
+      - "health: {{ health.json }}"
+      - "campaigns served: {{ campaigns.json.campaigns | length }}"
+      - "frontend: HTTP {{ frontend.status }}"
