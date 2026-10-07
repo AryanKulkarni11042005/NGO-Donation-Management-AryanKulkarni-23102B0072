@@ -32,7 +32,7 @@ export function CampaignCard({ campaign }: { campaign: Campaign }) {
       </div>
 
       <Link
-        to={`/donate/${campaign.title}`}
+        to={`/donate/${campaign.id}`}
         className="mt-4 inline-block text-center bg-primary hover:bg-primary-dark text-white text-sm font-semibold rounded-md px-4 py-2"
       >
         Donate
