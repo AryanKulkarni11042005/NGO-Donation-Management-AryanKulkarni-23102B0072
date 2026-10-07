@@ -1,0 +1,83 @@
+- name: Ensure PostgreSQL is running and enabled at boot
+  ansible.builtin.systemd:
+    name: postgresql
+    state: started
+    enabled: true
+
+# Setting a password unconditionally would report "changed" on every run, so
+# first check whether the application's credentials already work.
+- name: Check whether the application can already log in
+  community.postgresql.postgresql_ping:
+    login_host: 127.0.0.1
+    login_user: "{{ ngo_db_user }}"
+    login_password: "{{ ngo_db_password }}"
+    db: postgres
+  register: db_login
+  failed_when: false
+  no_log: true
+
+- name: Set the database user's password
+  community.postgresql.postgresql_user:
+    name: "{{ ngo_db_user }}"
+    password: "{{ ngo_db_password }}"
+  become_user: postgres
+  when: not (db_login.is_available | default(false))
+  no_log: true
+
+- name: Create the application database
+  community.postgresql.postgresql_db:
+    name: "{{ ngo_db_name }}"
+  become_user: postgres
+
+- name: Ship the schema to the node
+  ansible.builtin.copy:
+    src: schema.sql
+    dest: "{{ ngo_sql_dir }}/schema.sql"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Check whether the schema is already loaded
+  community.postgresql.postgresql_query:
+    db: "{{ ngo_db_name }}"
+    query: "SELECT to_regclass('public.campaigns') IS NOT NULL AS present"
+  become_user: postgres
+  register: schema_check
+  changed_when: false
+
+- name: Load the schema
+  community.postgresql.postgresql_script:
+    db: "{{ ngo_db_name }}"
+    path: "{{ ngo_sql_dir }}/schema.sql"
+  become_user: postgres
+  when: not schema_check.query_result[0].present
+
+- name: Check whether seed data exists
+  community.postgresql.postgresql_query:
+    db: "{{ ngo_db_name }}"
+    query: "SELECT count(*) AS n FROM users"
+  become_user: postgres
+  register: user_count
+  changed_when: false
+
+- name: Seed the admin account and sample campaigns
+  community.postgresql.postgresql_query:
+    db: "{{ ngo_db_name }}"
+    query: |
+      WITH admin AS (
+        INSERT INTO users (name, email, password_hash, role)
+        VALUES ('Admin', %s, %s, 'admin')
+        RETURNING id
+      )
+      INSERT INTO campaigns (title, description, target_amount, start_date, end_date, created_by)
+      SELECT t.title, t.description, t.target, CURRENT_DATE, CURRENT_DATE + 365, admin.id
+      FROM admin, (VALUES
+        ('Clean Water Fund', 'Provide clean drinking water to rural villages', 50000.00),
+        ('Education for All', 'School supplies for children', 300000.00)
+      ) AS t(title, description, target)
+    positional_args:
+      - "{{ ngo_admin_email }}"
+      - "{{ ngo_admin_password | password_hash('bcrypt') }}"
+  become_user: postgres
+  when: user_count.query_result[0].n | int == 0
+  no_log: true

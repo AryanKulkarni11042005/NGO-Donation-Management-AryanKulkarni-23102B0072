@@ -1,0 +1,37 @@
+# Read-only health report for the node: services, listening ports, live
+# release and end-to-end HTTP checks. Changes nothing.
+- name: Health-check the NGO Donation Portal node
+  hosts: ngo_nodes
+  become: true
+
+  tasks:
+    - name: Collect service states
+      ansible.builtin.service_facts:
+
+    - name: Assert the portal's services are running
+      ansible.builtin.assert:
+        that: ansible_facts.services[item].state == 'running'
+        fail_msg: "{{ item }} is {{ ansible_facts.services[item].state | default('missing') }}"
+        success_msg: "{{ item }} is running"
+      loop: [nginx.service, tomcat.service, postgresql@16-main.service, ssh.service]
+
+    - name: Listening TCP ports
+      ansible.builtin.command: ss -Htlnp
+      register: ports
+      changed_when: false
+
+    - name: Live release
+      ansible.builtin.command: cat {{ ngo_base_dir }}/RELEASE
+      register: live
+      changed_when: false
+
+    - name: Node summary
+      ansible.builtin.debug:
+        msg:
+          - "live release: {{ live.stdout }}"
+          - "{{ ports.stdout_lines }}"
+
+    - name: End-to-end HTTP checks
+      ansible.builtin.include_role:
+        name: app
+        tasks_from: healthcheck.yml

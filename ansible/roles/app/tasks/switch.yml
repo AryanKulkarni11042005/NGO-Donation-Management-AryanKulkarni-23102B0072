@@ -1,0 +1,38 @@
+- name: Point current at {{ target_release }}
+  ansible.builtin.file:
+    src: "{{ ngo_releases_dir }}/{{ target_release }}"
+    dest: "{{ ngo_current_link }}"
+    state: link
+    force: true
+  register: release_switch
+
+# Tomcat keeps the exploded copy of the previous WAR and its compiled cache;
+# both must go or it can keep serving the old release's classes.
+- name: Restart Tomcat on the new release
+  when: release_switch is changed
+  block:
+    - name: Stop Tomcat
+      ansible.builtin.systemd:
+        name: tomcat
+        state: stopped
+
+    - name: Clear the previous release's exploded webapp and work cache
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - "{{ tomcat_current }}/webapps{{ ngo_context_path }}"
+        - "{{ tomcat_current }}/work/Catalina/localhost{{ ngo_context_path }}"
+
+    - name: Start Tomcat
+      ansible.builtin.systemd:
+        name: tomcat
+        state: started
+
+- name: Record the live release
+  ansible.builtin.copy:
+    content: "{{ target_release }}\n"
+    dest: "{{ ngo_base_dir }}/RELEASE"
+    owner: root
+    group: root
+    mode: "0644"

@@ -9,6 +9,9 @@ pipeline {
         choice(name: 'ENVIRONMENT',
         choices: ['staging', 'production'],
         description: 'Target Environment')
+        booleanParam(name: 'PROVISION_NODE',
+        defaultValue: true,
+        description: 'Provision the Ansible target node and deploy this build to it')
     }
     stages {
         stage('Checkout'){
@@ -155,6 +158,31 @@ EOF
                 '''
             }
         }
+        stage('Provision Node (Ansible)') {
+            when { expression { params.PROVISION_NODE } }
+            steps {
+                // ansible lives in /opt/homebrew/bin; node.sh needs docker from /usr/local/bin.
+                withEnv(['PATH+TOOLS=/opt/homebrew/bin:/usr/local/bin', 'ANSIBLE_FORCE_COLOR=0']) {
+                    sh './ansible/node/node.sh up'
+                    withCredentials([
+                        string(credentialsId: 'db-password', variable: 'NGO_DB_PASSWORD'),
+                        string(credentialsId: 'jwt-secret', variable: 'NGO_JWT_SECRET'),
+                        string(credentialsId: 'ngo-admin-password', variable: 'NGO_ADMIN_PASSWORD')
+                    ]) {
+                        // A failed health check rolls the node back to its previous
+                        // release inside the playbook, then fails this stage.
+                        sh """
+                            cd ansible
+                            ansible-playbook playbook.yml \
+                                -e ngo_release=build-${env.BUILD_NUMBER} \
+                                -e ngo_war_src=${env.WORKSPACE}/backend-springboot/target/store.war \
+                                -e ngo_frontend_src=${env.WORKSPACE}/frontend/dist/
+                            ansible-playbook healthcheck.yml
+                        """
+                    }
+                }
+            }
+        }
     }
     post {
         always {
@@ -167,7 +195,7 @@ EOF
                              fingerprint: true
         }
         success {
-            echo "Deployed to ${params.ENVIRONMENT} (Tomcat + Docker build ${env.BUILD_NUMBER}) and all tests passed."
+            echo "Deployed build ${env.BUILD_NUMBER} to ${params.ENVIRONMENT} (Tomcat + Docker${params.PROVISION_NODE ? ' + Ansible node' : ''}) and all tests passed."
         }
         failure {
             echo "Build failed - check the test report for the failing stage."

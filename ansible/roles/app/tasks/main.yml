@@ -1,0 +1,101 @@
+# Each release lives in its own directory under releases/; "current" is a
+# symlink to the live one and Tomcat's webapps/store.war points through it.
+# Switching releases is therefore one atomic symlink change plus a restart,
+# and rolling back is the same operation pointed at the previous directory.
+
+- name: Check the release artifact exists on the controller
+  ansible.builtin.stat:
+    path: "{{ ngo_war_src }}"
+  delegate_to: localhost
+  become: false
+  register: war_artifact
+
+- name: Fail early if the artifact is missing
+  ansible.builtin.assert:
+    that: war_artifact.stat.exists
+    fail_msg: "No WAR at {{ ngo_war_src }} -- pass -e ngo_war_src=/path/to/store.war"
+    quiet: true
+
+- name: Find the currently live release
+  ansible.builtin.stat:
+    path: "{{ ngo_current_link }}"
+  register: current_before
+
+- name: Remember it as the rollback target
+  ansible.builtin.set_fact:
+    ngo_previous_release: >-
+      {{ current_before.stat.lnk_target | basename
+         if current_before.stat.islnk | default(false) else '' }}
+
+- name: Create the release directory for {{ ngo_release }}
+  ansible.builtin.file:
+    path: "{{ ngo_releases_dir }}/{{ ngo_release }}"
+    state: directory
+    owner: "{{ tomcat_user }}"
+    group: "{{ tomcat_user }}"
+    mode: "0755"
+
+- name: Upload the {{ ngo_release }} WAR
+  ansible.builtin.copy:
+    src: "{{ ngo_war_src }}"
+    dest: "{{ ngo_releases_dir }}/{{ ngo_release }}/store.war"
+    owner: "{{ tomcat_user }}"
+    group: "{{ tomcat_user }}"
+    mode: "0644"
+
+- name: Point Tomcat's webapp at the live release
+  ansible.builtin.file:
+    src: "{{ ngo_current_link }}/store.war"
+    dest: "{{ tomcat_current }}/webapps/store.war"
+    state: link
+    force: true
+    follow: false
+
+- name: Deploy {{ ngo_release }}, rolling back automatically if it is unhealthy
+  block:
+    - name: Switch to {{ ngo_release }}
+      ansible.builtin.include_tasks: switch.yml
+      vars:
+        target_release: "{{ ngo_release }}"
+
+    - name: Health-check {{ ngo_release }}
+      ansible.builtin.include_tasks: healthcheck.yml
+
+    - name: Find old releases
+      ansible.builtin.find:
+        paths: "{{ ngo_releases_dir }}"
+        file_type: directory
+      register: all_releases
+
+    - name: Prune releases beyond the newest {{ ngo_keep_releases }}
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        state: absent
+      loop: "{{ (all_releases.files | sort(attribute='mtime', reverse=true))[ngo_keep_releases:] }}"
+      loop_control:
+        label: "{{ item.path | basename }}"
+      when: item.path | basename not in [ngo_release, ngo_previous_release]
+
+  rescue:
+    - name: Report the failed release
+      ansible.builtin.debug:
+        msg: "{{ ngo_release }} failed its health check; rolling back to '{{ ngo_previous_release }}'"
+
+    - name: Stop if there is nothing to roll back to
+      ansible.builtin.fail:
+        msg: "{{ ngo_release }} is unhealthy and there is no previous release to restore."
+      when: ngo_previous_release in ['', ngo_release]
+
+    - name: Switch back to {{ ngo_previous_release }}
+      ansible.builtin.include_tasks: switch.yml
+      vars:
+        target_release: "{{ ngo_previous_release }}"
+
+    - name: Health-check the restored release
+      ansible.builtin.include_tasks: healthcheck.yml
+
+    - name: Fail the run so the bad release is visible
+      ansible.builtin.fail:
+        msg: >-
+          Release {{ ngo_release }} failed its health check and was rolled back.
+          {{ ngo_previous_release }} is live again and healthy.

@@ -1,0 +1,39 @@
+- name: Install the portal's nginx site
+  ansible.builtin.template:
+    src: ngo.conf.j2
+    dest: /etc/nginx/sites-available/ngo.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload nginx
+
+- name: Enable the portal's site
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/ngo.conf
+    dest: /etc/nginx/sites-enabled/ngo.conf
+    state: link
+  notify: Reload nginx
+
+- name: Disable nginx's default site
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: Reload nginx
+
+- name: Publish the built frontend
+  ansible.builtin.copy:
+    src: "{{ ngo_frontend_src }}"
+    dest: "{{ ngo_web_root }}/"
+    owner: root
+    group: root
+    mode: "0644"
+    directory_mode: "0755"
+
+- name: Ensure nginx is running and enabled at boot
+  ansible.builtin.systemd:
+    name: nginx
+    state: started
+    enabled: true
+
+- name: Apply pending nginx reloads before deploying
+  ansible.builtin.meta: flush_handlers

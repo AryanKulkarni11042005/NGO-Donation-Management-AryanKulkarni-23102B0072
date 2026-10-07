@@ -1,0 +1,49 @@
+# ---- Layout -------------------------------------------------------------
+ngo_base_dir: /opt/ngo
+ngo_releases_dir: "{{ ngo_base_dir }}/releases"
+ngo_current_link: "{{ ngo_base_dir }}/current"
+ngo_sql_dir: "{{ ngo_base_dir }}/sql"
+ngo_config_dir: /etc/ngo
+ngo_env_file: "{{ ngo_config_dir }}/ngo.env"
+ngo_web_root: /var/www/ngo-frontend
+ngo_keep_releases: 3
+
+# ---- Packages -------------------------------------------------------------
+ngo_base_packages:
+  - acl
+  - curl
+  - ca-certificates
+  - tar
+  - openjdk-17-jre-headless
+  - postgresql
+  - python3-psycopg2
+  - nginx
+
+# ---- Tomcat ---------------------------------------------------------------
+tomcat_version: "11.0.24"
+tomcat_user: tomcat
+tomcat_home: /opt/tomcat
+tomcat_current: "{{ tomcat_home }}/current"
+tomcat_port: 8080
+tomcat_url: "https://archive.apache.org/dist/tomcat/tomcat-11/v{{ tomcat_version }}/bin/apache-tomcat-{{ tomcat_version }}.tar.gz"
+
+# ---- Database -------------------------------------------------------------
+ngo_db_name: ngo-donation-portal
+ngo_db_user: postgres
+ngo_db_port: 5432
+
+# ---- Web ------------------------------------------------------------------
+ngo_http_port: 80
+ngo_context_path: /store
+
+# ---- Release being deployed -----------------------------------------------
+# Override per run: -e ngo_release=build-22 -e ngo_war_src=/path/to/store.war
+ngo_release: build-21
+ngo_war_src: "{{ lookup('env', 'HOME') }}/.jenkins/jobs/ngo-donation-portal-pipeline/builds/21/archive/backend-springboot/target/store.war"
+ngo_frontend_src: "{{ playbook_dir }}/../frontend/dist/"
+
+# ---- Secrets: read from the controller's environment, never committed -----
+ngo_db_password: "{{ lookup('env', 'NGO_DB_PASSWORD') }}"
+ngo_jwt_secret: "{{ lookup('env', 'NGO_JWT_SECRET') }}"
+ngo_admin_password: "{{ lookup('env', 'NGO_ADMIN_PASSWORD') }}"
+ngo_admin_email: admin@ngo.org

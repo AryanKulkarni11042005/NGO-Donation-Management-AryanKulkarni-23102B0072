@@ -9,6 +9,13 @@ services:
       - "5434:5432"
     volumes:
       - db-data:/var/lib/postgresql/data
+      # Runs only when the volume is first initialised (the backend does not
+      # create tables itself: spring.jpa.hibernate.ddl-auto=none).
+      - ./ansible/roles/postgres/files/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ngo-donation-portal"]
+      interval: 5s
+      retries: 10
 
   backend-springboot:
     image: ngo-backend:latest
@@ -17,7 +24,8 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   frontend:
     build:

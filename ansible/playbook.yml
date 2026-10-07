@@ -1,1 +1,25 @@
-# Placeholder - implemented later (Ansible provisioning phase)
+# Provision a clean Ubuntu 24.04 node and deploy one release of the portal.
+#   ansible-playbook playbook.yml                                   # default release
+#   ansible-playbook playbook.yml -e ngo_release=build-22 -e ngo_war_src=/path/store.war
+- name: Provision and deploy the NGO Donation Portal
+  hosts: ngo_nodes
+  become: true
+
+  pre_tasks:
+    - name: Require secrets from the controller environment
+      ansible.builtin.assert:
+        that:
+          - ngo_db_password | length > 0
+          - ngo_jwt_secret | length >= 32
+          - ngo_admin_password | length > 0
+        fail_msg: >-
+          Export NGO_DB_PASSWORD, NGO_JWT_SECRET (32+ chars) and
+          NGO_ADMIN_PASSWORD before running the playbook.
+        quiet: true
+
+  roles:
+    - common
+    - postgres
+    - tomcat
+    - nginx
+    - app

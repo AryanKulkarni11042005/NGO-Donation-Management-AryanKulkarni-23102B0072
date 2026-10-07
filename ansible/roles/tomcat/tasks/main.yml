@@ -1,0 +1,65 @@
+- name: Download Tomcat {{ tomcat_version }} (checksum-verified)
+  ansible.builtin.get_url:
+    url: "{{ tomcat_url }}"
+    dest: "{{ tomcat_home }}/apache-tomcat-{{ tomcat_version }}.tar.gz"
+    checksum: "sha512:{{ tomcat_url }}.sha512"
+    mode: "0644"
+
+- name: Unpack Tomcat
+  ansible.builtin.unarchive:
+    src: "{{ tomcat_home }}/apache-tomcat-{{ tomcat_version }}.tar.gz"
+    dest: "{{ tomcat_home }}"
+    remote_src: true
+    owner: "{{ tomcat_user }}"
+    group: "{{ tomcat_user }}"
+    creates: "{{ tomcat_home }}/apache-tomcat-{{ tomcat_version }}/bin/catalina.sh"
+
+- name: Point {{ tomcat_current }} at this Tomcat version
+  ansible.builtin.file:
+    src: "{{ tomcat_home }}/apache-tomcat-{{ tomcat_version }}"
+    dest: "{{ tomcat_current }}"
+    state: link
+  notify: Restart tomcat
+
+- name: Remove Tomcat's bundled sample and admin webapps
+  ansible.builtin.file:
+    path: "{{ tomcat_current }}/webapps/{{ item }}"
+    state: absent
+  loop: [ROOT, docs, examples, manager, host-manager]
+
+# Only nginx is exposed; Tomcat is reachable from this host alone.
+- name: Bind the Tomcat HTTP connector to loopback
+  ansible.builtin.replace:
+    path: "{{ tomcat_current }}/conf/server.xml"
+    regexp: '<Connector port="{{ tomcat_port }}" protocol="HTTP/1.1"'
+    replace: '<Connector address="127.0.0.1" port="{{ tomcat_port }}" protocol="HTTP/1.1"'
+  notify: Restart tomcat
+
+- name: Write the application environment file (DB URL and secrets)
+  ansible.builtin.template:
+    src: ngo.env.j2
+    dest: "{{ ngo_env_file }}"
+    owner: root
+    group: "{{ tomcat_user }}"
+    mode: "0640"
+  notify: Restart tomcat
+  no_log: true
+
+- name: Install the tomcat systemd unit
+  ansible.builtin.template:
+    src: tomcat.service.j2
+    dest: /etc/systemd/system/tomcat.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart tomcat
+
+- name: Ensure Tomcat is running and enabled at boot
+  ansible.builtin.systemd:
+    name: tomcat
+    state: started
+    enabled: true
+    daemon_reload: true
+
+- name: Apply pending Tomcat restarts before deploying
+  ansible.builtin.meta: flush_handlers
