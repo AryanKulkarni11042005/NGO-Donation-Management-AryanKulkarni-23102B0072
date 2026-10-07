@@ -43,19 +43,3 @@ npm run dev
 ## Database
 
 PostgreSQL database `ngo-donation-portal` on port `5433`.
-
-## Roadmap
-
-Features are developed on individual branches and merged via Pull Request:
-
-1. `feature/project-scaffold`
-2. `feature/database`
-3. `feature/auth`
-4. `feature/campaigns`
-5. `feature/dashboard`
-6. `feature/donation-flow`
-7. `feature/certificate`
-8. `feature/docker`
-9. `release/v1.0`
-
-CI/CD (Jenkins, Selenium), containerization (Docker), and provisioning (Ansible) are added in later phases per the project schedule.
